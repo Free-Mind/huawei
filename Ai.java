@@ -236,11 +236,8 @@ public class Ai {
 		
 		else if(state==0){//ʲôҲû��
 			if(pub_pokes[3]==null){//����ƶ�����ֻ�������� �����е��Ƽ��������ĸ���ɫ��ͬ
-				int[] test=Pub_check.check(pokes);
-				if(test[0]==Pub_check.sitonghua){
-					if(lastjetton<safebet){
-						act=action(call,0);
-					}
+				if(checkstate.checkprestate(pokes)==checkstate.ZHUNTONGHUA || checkstate.checkprestate(pokes)==checkstate.ZHUNSHUNZI){
+					act=action(call,0);
 				}
 			}
 			else{
