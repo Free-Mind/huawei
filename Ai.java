@@ -236,7 +236,7 @@ public class Ai {
 		
 		else if(state==0){//ʲôҲû��
 			if(pub_pokes[3]==null){//����ƶ�����ֻ�������� �����е��Ƽ��������ĸ���ɫ��ͬ
-				if(checkstate.checkprestate(pokes)==checkstate.ZHUNTONGHUA || checkstate.checkprestate(pokes)==checkstate.ZHUNSHUNZI){
+				if(Checkstate.checkprestate(pokes)==checkstate.ZHUNTONGHUA || Checkstate.checkprestate(pokes)==checkstate.ZHUNSHUNZI){
 					act=action(call,0);
 				}
 			}
