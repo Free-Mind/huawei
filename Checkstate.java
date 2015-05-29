@@ -1,62 +1,62 @@
 package run;
 
-public class checkstate {
+public class Checkstate {
 
 	/**
-	 * 高牌，即散牌
+	 * 楂樼墝锛屽嵆鏁ｇ墝
 	 */
 	final public  static int GAOPAI = 0;
 	
 	/**
-	 * 对子，即有且只有一个对子
+	 * 瀵瑰瓙锛屽嵆鏈変笖鍙湁涓�釜瀵瑰瓙
 	 */
 	final public static int DUIZI = 1;
 	
 	/**
-	 * 两对子，即有且只有两个对子
+	 * 涓ゅ瀛愶紝鍗虫湁涓斿彧鏈変袱涓瀛�
 	 */
 	final public  static int TWODUIZI = 2;
 	/**
-	 * 三条，即有三个一样的数值的牌
+	 * 涓夋潯锛屽嵆鏈変笁涓竴鏍风殑鏁板�鐨勭墝
 	 */
 	final public static int SANTIAO = 3;
 	/**
-	 * 顺子
+	 * 椤哄瓙
 	 */
 	final public  static int SHUNZI = 4;
 	/**
-	 *同花
+	 *鍚岃姳
 	 */
 	final public static int TONGHUA = 5;
 	/**
-	 *葫芦，即有一个三条和一个对子
+	 *钁姦锛屽嵆鏈変竴涓笁鏉″拰涓�釜瀵瑰瓙
 	 */
 	final public  static int HULU = 6;
 	
 	/**
-	 * 四条，即有四个一样数值的牌
+	 * 鍥涙潯锛屽嵆鏈夊洓涓竴鏍锋暟鍊肩殑鐗�
 	 */
 	final public static int SITIAO = 7;
 	
 	/**
-	 * 同花顺
+	 * 鍚岃姳椤�
 	 */
 	final public  static int TONGHUASHUN = 8;
 	
 	/**
-	 * 皇家同花顺,即A开头的同花顺
+	 * 鐨囧鍚岃姳椤�鍗矨寮�ご鐨勫悓鑺遍『
 	 */
 	final public static int HUANJIATONGHUASHUN = 9;
 	/**
-	 * 准同花，四张花色一样
+	 * 鍑嗗悓鑺憋紝鍥涘紶鑺辫壊涓�牱
 	 */
 	final public static int ZHUNTONGHUA = -1;
 	/**
-	 * 准顺子，四张单连
+	 * 鍑嗛『瀛愶紝鍥涘紶鍗曡繛
 	 */
 	final public static int ZHUNSHUNZI = -2;
 	
-	public static int checkState(poker[] poker){
+	public static int checkState(Poker[] poker){
 		if(checkHUANJIATONGHUASHUN(poker)){
 			return HUANJIATONGHUASHUN;
 		}
@@ -87,7 +87,7 @@ public class checkstate {
 		return GAOPAI;
 	}
 	
-	public static int checkprestate(poker[] poker){
+	public static int checkprestate(Poker[] poker){
 		if(checkZHUNTONGHUA(poker)){
 			return ZHUNTONGHUA;
 		}
@@ -96,7 +96,7 @@ public class checkstate {
 		}
 		return GAOPAI;
 	}
-	public static boolean checkDUIZI(poker[] poker){
+	public static boolean checkDUIZI(Poker[] poker){
 		boolean isDUIZI = false; 
 		int len = poker.length;
 		if( len < 2){
@@ -110,7 +110,7 @@ public class checkstate {
 		return isDUIZI;
 	}
 	
-	public static  boolean checkTWODUIZI(poker[] poker){
+	public static  boolean checkTWODUIZI(Poker[] poker){
 		boolean isTWODUIZI = false;
 		int len = poker.length;
 		if(!checkDUIZI(poker) || len < 4){
@@ -128,7 +128,7 @@ public class checkstate {
 		return isTWODUIZI;
 	}
 	
-	public static boolean checkSANTIAO(poker[] poker){
+	public static boolean checkSANTIAO(Poker[] poker){
 		boolean isSANTIAO = false;
 		int len = poker.length;
 		if(!checkDUIZI(poker) ||len < 3){
@@ -142,7 +142,7 @@ public class checkstate {
 		return isSANTIAO;
 	}
 	
-	public static boolean checkSHUNZI(poker[] poker){
+	public static boolean checkSHUNZI(Poker[] poker){
 		boolean isSHUNZI = false;
 		int len = poker.length;
 		if(len < 5){
@@ -163,7 +163,7 @@ public class checkstate {
 		return isSHUNZI;
 	}
 	
-	public static boolean checkTONGHUA(poker[] poker){
+	public static boolean checkTONGHUA(Poker[] poker){
 		boolean isTONGHUA = false;
 		int len = poker.length;
 		if(len < 5){
@@ -184,13 +184,13 @@ public class checkstate {
 		return isTONGHUA;
 	}
 
-	public static boolean checkHULU(poker[] poker){
+	public static boolean checkHULU(Poker[] poker){
 		boolean isHULU = false;
 		int len = poker.length;
 		if(!checkDUIZI(poker) || !checkSANTIAO(poker) || len < 5){
 			return false;
 		}
-		poker[]  temp = new poker[len-3];
+		Poker[]  temp = new Poker[len-3];
 		for(int i=0, j=0; i<len-2; i++){
 			if(!(poker[i].getnum() == poker[i+1].getnum() && poker[i+1].getnum() == poker[i+2].getnum())){
 				temp[j] = poker[i];
@@ -201,7 +201,7 @@ public class checkstate {
 		return isHULU;
 	}
 	
-	public static boolean checkSITIAO(poker[] poker){
+	public static boolean checkSITIAO(Poker[] poker){
 		boolean isSITIAO = false;
 		int len = poker.length;
 		if(!checkDUIZI(poker) || !checkSANTIAO(poker) || len < 4){
@@ -217,7 +217,7 @@ public class checkstate {
 		return isSITIAO;
 	}
 	
-	public static boolean checkTONGHUASHUN(poker[] poker){
+	public static boolean checkTONGHUASHUN(Poker[] poker){
 		boolean isTONGHUASHUN = false;
 		int len = poker.length;
 		if(!checkTONGHUA(poker)|| !checkSHUNZI(poker) || len < 4){
@@ -243,7 +243,7 @@ public class checkstate {
 		return isTONGHUASHUN;
 	}
 	
-	public static boolean checkHUANJIATONGHUASHUN(poker[] poker){
+	public static boolean checkHUANJIATONGHUASHUN(Poker[] poker){
 		boolean isHUANJIATONGHUASHUN = false;
 		int len = poker.length;
 		if(!checkTONGHUA(poker)|| !checkSHUNZI(poker) || len < 4){
@@ -267,7 +267,7 @@ public class checkstate {
 		return isHUANJIATONGHUASHUN;
 	}
 	
-	public static boolean checkZHUNTONGHUA(poker[] poker){
+	public static boolean checkZHUNTONGHUA(Poker[] poker){
 		boolean isZHUNTONGHUA = false;
 		int len = poker.length;
 		if(len < 5 || len > 6){
@@ -288,7 +288,7 @@ public class checkstate {
 		return isZHUNTONGHUA;
 	}
 	
-	public static boolean checkZHUNSHUNZI(poker[] poker){
+	public static boolean checkZHUNSHUNZI(Poker[] poker){
 		boolean isZHUNSHUNZI = false;
 		int len = poker.length;
 		if(len < 5 || len > 6){

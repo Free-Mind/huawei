@@ -1,3 +1,4 @@
+package run;
 public class Poker {
 	final public static int hearts=3;
 	final public static int spades=0;

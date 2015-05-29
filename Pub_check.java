@@ -1,3 +1,4 @@
+package run;
 public class Pub_check {
 	final public static int nothing=0;
 	final public static int duizi=1;
