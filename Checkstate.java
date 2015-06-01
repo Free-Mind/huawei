@@ -1,5 +1,3 @@
-﻿package run;
-
 public class Checkstate {
 
 	/**

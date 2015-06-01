@@ -1,4 +1,3 @@
-package run;
 public class Pub_check {
 	final public static int nothing=0;
 	final public static int duizi=1;
@@ -7,7 +6,8 @@ public class Pub_check {
 	final public static int sitonghua=4;
 	public static int[] check(Poker[] p){
 		int[] tmp = new int[2];
-		if (p.length==3){
+		int l=getlength(p);
+		if (l==3){
 			if(issantiao(p)){
 				tmp[0]=santiao;
 				tmp[1]=p[0].getnum();
@@ -21,7 +21,7 @@ public class Pub_check {
 				tmp[1]=nothing;
 			}
 		}
-		else if (p.length==4 || p.length==5){
+		else if (l==4 || l==5){
 			if(iszhadan(p)){
 				tmp[0]=zhadan;
 				tmp[1]=p[1].getnum();
@@ -44,7 +44,7 @@ public class Pub_check {
 			}
 			else if(isduizi(p)){
 				tmp[0]=duizi;
-				if(p.length==4){
+				if(l==4){
 					if(p[0].getnum()==p[1].getnum()){
 						tmp[1]=p[0].getnum();
 					}
@@ -78,7 +78,7 @@ public class Pub_check {
 		return tmp;
 	}
 	public static boolean isduizi(Poker[] p){
-		int l = p.length;
+		int l = getlength(p);
 		if(l<2) return false;
 		for(int i=0;i<l-1;i++){
 			if(p[i].getnum()==p[i+1].getnum())
@@ -87,7 +87,7 @@ public class Pub_check {
 		return false;
 	}
 	public static boolean issantiao(Poker[] p){
-		int l = p.length;
+		int l = getlength(p);
 		if (l<3) return false;
 		for (int i=0;i<l-2;i++){
 			if(p[i].getnum()==p[i+1].getnum() && p[i+1].getnum()==p[i+2].getnum())
@@ -96,7 +96,7 @@ public class Pub_check {
 		return false;
 	}
 	public static boolean iszhadan(Poker[] p){
-		int l = p.length;
+		int l = getlength(p);
 		if (l<4) return false;
 		for (int i=0;i<l-3;i++){
 			if(p[i].getnum()==p[i+1].getnum() && p[i+1].getnum()==p[i+2].getnum() && p[i+2].getnum()==p[i+3].getnum())
@@ -105,7 +105,7 @@ public class Pub_check {
 		return false;
 	}
 	public static boolean istonghua(Poker[] p){
-		int l = p.length;
+		int l = getlength(p);
 		if (l<4) return false;
 		if(l==4){
 			if(p[0].gettype()==p[1].gettype() && p[1].gettype()==p[2].gettype() && p[2].gettype()==p[3].gettype() )
@@ -134,5 +134,15 @@ public class Pub_check {
 			}
 		}
 		return false;
+	}
+	public static int getlength(Poker[] p){
+		int l=0;
+		for(int i=0;i<p.length;i++){
+			if(p[i]==null){
+				break;
+			}
+			l++;
+		}
+		return l;
 	}
 }

@@ -1,4 +1,3 @@
-package run;
 import java.util.*;
 public class Ai {
 	final public static int fold=0;
@@ -14,12 +13,12 @@ public class Ai {
 	boolean needfold=false;//锟借不锟斤拷要直锟斤拷fold
 	double safety=0;//锟斤拷注锟斤拷全值 系锟斤拷
 	double n_safe=0.15;//锟斤拷全值系锟斤拷 锟轿匡拷锟斤拷小
-	int safebet=0,total=0;
+	int safebet=0,total=0,bigblind=0;
 	int state=0;//0-9锟斤拷示锟狡碉拷锟斤拷锟酵达拷小
-	final public static int MIN_SAFETY = 100;
-	final public static double SAFETY_FIGURE = 0.001; //
-	final public static double MAX_RAISE = 5000;
-	final public static double RAISE_FIGURE = 1;
+	public static int MIN_SAFETY;
+	public static double SAFETY_FIGURE; 
+	public static double MAX_RAISE;
+	public static double RAISE_FIGURE;
 	final public static double POOREST = 0.2;
 	final public static double POOR = 0.4;
 	final public static double GENERAL = 0.6;
@@ -56,7 +55,7 @@ public class Ai {
 	
 	final public static int THREESHUNZI = Checkstate.THREESHUNZI;
 	
-	
+	int startjetton=0,starttotal=0,count=0;
 	//每一锟街匡拷始执锟叫的筹拷始锟斤拷
 	public void e_seat(String[][] s,int p){
 		int m = s.length;
@@ -69,12 +68,22 @@ public class Ai {
 //			}
 //		}
 		for(int k=0;k<m;k++){
-			if(Integer.parseInt(s[k][1])==pid){
-				jetton=Integer.parseInt(s[k][2]);//锟斤拷取锟皆硷拷剩锟斤拷亩慕锟�
-				money=Integer.parseInt(s[k][3]);//锟斤拷取锟皆硷拷剩锟斤拷锟角�
+			if(s[k]!=null){
+				if(Integer.parseInt(s[k][1])==pid){
+					jetton=Integer.parseInt(s[k][2]);//锟斤拷取锟皆硷拷剩锟斤拷亩慕锟�
+					money=Integer.parseInt(s[k][3]);//锟斤拷取锟皆硷拷剩锟斤拷锟角�
+				}
 			}
 		}
 		total=jetton+money;
+		if(count==0){
+			startjetton=jetton;
+			starttotal=total;
+			MAX_RAISE = startjetton;
+			SAFETY_FIGURE = startjetton/28;
+			RAISE_FIGURE = startjetton/14;
+			count=1;
+		}
 	}
 	private void danger_control(int bet){//危锟秸匡拷锟斤拷
 		if(total<=2000)
@@ -88,18 +97,22 @@ public class Ai {
 		else if(a==1)
 			str="call\n";
 		else if(a==2)
-			str="raise b\n";
+			str="raise "+b+"\n";
 		else if(a==4)
 			str="check\n";
 		return str;
 	}
 	public void e_blind(String[][] s){
-		if(s.length==2){
+		if(s[1]!=null){
 			safebet=Integer.parseInt(s[1][1])*3;
+			bigblind=Integer.parseInt(s[1][1]);
+			
 		}
 		else{
-			safebet=Integer.parseInt(s[0][1])*3;
+			safebet=Integer.parseInt(s[0][1])*6;
+			bigblind=Integer.parseInt(s[0][1])*2;
 		}
+		MIN_SAFETY = bigblind * 5;
 	}
 	public void e_hold(Poker[] p){//锟矫碉拷锟皆硷拷锟斤拷锟斤拷锟斤拷
 		pokes[0]=p[0];self_pokes[0]=p[0];
@@ -183,8 +196,8 @@ public class Ai {
 		int max_num = self_pokes[0].getnum();
 		int second_num = self_pokes[1].getnum();
 		int minSafety = (int)(MIN_SAFETY * richstate);
-		if(minSafety > total){
-			minSafety = total;
+		if(minSafety > jetton){
+			minSafety = jetton;
 		}
 		int safety = 0;
 		if(state == GAOPAI){
@@ -193,15 +206,15 @@ public class Ai {
 			}else if(second_num<10){
 				safety = minSafety;
 			}else if(second_num >= 10){
-				safety = (int) (total*SAFETY_FIGURE*(max_num-10));
+				safety = (int) (jetton*SAFETY_FIGURE*second_num);
 			}
 		}else if(state ==  DUIZI){
 			if(max_num == 14){
-				safety = total;
+				safety = jetton;
 			}else if(max_num == 13){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else{
-				safety = (int) (total*SAFETY_FIGURE*max_num + minSafety);
+				safety = (int) (jetton*SAFETY_FIGURE*max_num + minSafety);
 			}
 			
 		}
@@ -211,8 +224,8 @@ public class Ai {
 	public int getSafety(Poker[] pokers, Poker[] pub_pokers, Poker[] self_pokers){
 		double richstate = getRichState();
 		int minSafety = (int)(MIN_SAFETY * richstate);
-		if(minSafety > total){
-			minSafety = total;
+		if(minSafety > jetton){
+			minSafety = jetton;
 		}
 		int safety = 0;
 		int state = Checkstate.checkState(pokers);
@@ -221,118 +234,118 @@ public class Ai {
 		int prestate = Checkstate.checkprestate(pokers);
 		switch(state){
 		case HUANJIATONGHUASHUN:
-			safety = total;
+			safety = jetton;
 		case TONGHUASHUN:
 			if(pub_state == TONGHUASHUN){
 				safety = 0;
 			}else if(pub_prestate != ZHUNTONGHUASHUN){
-				safety = total;
+				safety = jetton;
 			}else{
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}
 			break;
 		case SITIAO:
 			if(pub_state == SITIAO){
 				if(self_pokers[0].getnum() > 12){
-					safety = (int) (total * SAFETY_FIGURE * (self_pokers[0].getnum() - 12));
+					safety = (int) (jetton * SAFETY_FIGURE * (self_pokers[0].getnum() - 12));
 				}else{
 					safety = 0;
 				}
 			}else if(pub_state != SANTIAO){
-				safety = total;
+				safety = jetton;
 			}else{
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}
 			break;
 		case HULU:
 			if(pub_state == HULU){
 				safety = 0;
 			}else if(pub_state != SANTIAO){
-				safety = total;
+				safety = jetton;
 			}else{
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}
 			break;
 		case TONGHUA:
 			if(pub_state == TONGHUA){
 				safety = 0;
 			}else if(pub_prestate!=ZHUNTONGHUASHUN || pub_prestate!=ZHUNTONGHUA || pub_state != SANTIAO || pub_state != DUIZI){
-				safety = total;
+				safety = jetton;
 			}else if(pub_prestate == ZHUNTONGHUASHUN){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_prestate == SANTIAO){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_state == ZHUNTONGHUA){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton;
 			}else if(pub_state == DUIZI){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton;
 			}else{
-				safety = total;
+				safety = jetton;
 			}
 			break;
 		case SHUNZI:
 			if(pub_state == SHUNZI){
 				safety = 0;
 			}else if(pub_prestate!=ZHUNTONGHUASHUN ||pub_prestate != ZHUNTONGHUA || pub_prestate != ZHUNSHUNZI || pub_state != SANTIAO || pub_state != TWODUIZI || pub_state != DUIZI){
-				safety = total;
+				safety = jetton;
 			}else if(pub_prestate == ZHUNTONGHUASHUN){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_prestate == ZHUNTONGHUA){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_state == SANTIAO){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_prestate == TWODUIZI){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_prestate == ZHUNSHUNZI){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_state == DUIZI){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton;
 			}else{
-				safety = total;
+				safety = jetton;
 			}
 			break;
 		case SANTIAO:
 			if(pub_state == SANTIAO){
 				if(self_pokers[0].getnum() == 14){
-					safety = total;
+					safety = jetton;
 				}else if(self_pokers[0].getnum() == 13){
-					safety = total/2>minSafety?total/2:minSafety;
+					safety = jetton/2>minSafety?jetton/2:minSafety;
 				}else{
 					safety = 0;
 				}
 			}else if(pub_prestate == ZHUNTONGHUASHUN){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_state == TWODUIZI){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_prestate == ZHUNTONGHUA){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_prestate == ZHUNSHUNZI){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_state == DUIZI){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else{
-				safety = total;
+				safety = jetton;
 			}
 			break;
 		case TWODUIZI:
 			if(pub_state == TWODUIZI){
 				if(self_pokers[0].getnum() == 14){
-					safety = total;
+					safety = jetton;
 				}else if(self_pokers[0].getnum() == 13){
-					safety = total/2>minSafety?total/2:minSafety;
+					safety = jetton/2>minSafety?jetton/2:minSafety;
 				}else{
 					safety = 0;
 				}
 			}else if(pub_prestate == ZHUNTONGHUASHUN){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_prestate == ZHUNTONGHUA){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_prestate == ZHUNSHUNZI){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else if(pub_state == DUIZI){
-				safety = total/2>minSafety?total/2:minSafety;
+				safety = jetton/2>minSafety?jetton/2:minSafety;
 			}else{
-				safety = total;
+				safety = jetton;
 			}
 			break;
 		case DUIZI:
@@ -343,11 +356,11 @@ public class Ai {
 				if(duizi_num > 10){
 					safety = (int) (MAX_RAISE*RAISE_FIGURE*duizi_num);
 					if(pub_prestate == ZHUNTONGHUASHUN){
-						safety = total/3>minSafety?total/3:minSafety;
+						safety = jetton/3>minSafety?jetton/3:minSafety;
 					}else if(pub_prestate == ZHUNTONGHUA){
-						safety = total/3>minSafety?total/3:minSafety;
+						safety = jetton/3>minSafety?jetton/3:minSafety;
 					}else if(pub_prestate == ZHUNSHUNZI){
-						safety = total/3>minSafety?total/3:minSafety;
+						safety = jetton/3>minSafety?jetton/3:minSafety;
 					}
 				}else{
 					safety = 0;
@@ -357,15 +370,15 @@ public class Ai {
 		case GAOPAI:
 			if(pokers.length == 5){
 				if(prestate == ZHUNTONGHUASHUN){
-					safety = total/2>minSafety?total/2:minSafety;
+					safety = jetton/3>minSafety?jetton/3:minSafety;
 				}else if(prestate == ZHUNSHUNZI || prestate == ZHUNTONGHUA){
-					safety = total/2>minSafety?total/2:minSafety;
+					safety = jetton/3>minSafety?jetton/3:minSafety;
 				}
 			}else if(pokers.length == 6){
 				if(prestate == ZHUNTONGHUASHUN){
-					safety = total/3>minSafety?total/3:minSafety;
+					safety = jetton/3>minSafety?jetton/3:minSafety;
 				}else if(prestate == ZHUNSHUNZI || prestate == ZHUNTONGHUA){
-					safety = total/3>minSafety?total/3:minSafety;
+					safety = jetton/3>minSafety?jetton/3:minSafety;
 				}
 			}else{
 				safety = 0;
@@ -417,20 +430,20 @@ public class Ai {
 		int raise_num = 0;
 		double richstate = getRichState();
 		int max_raise = (int)(MAX_RAISE*richstate - bet);
-		if(max_raise > total){
-			max_raise = total;
+		if(max_raise > jetton){
+			max_raise = jetton;
 		}
 		int state = Checkstate.checkState(pokers);
 		int pub_state = Checkstate.checkState(pub_pokers);
 		int pub_prestate = Checkstate.checkprestate(pub_pokers);
 		switch(state){
 			case HUANJIATONGHUASHUN:
-				return  (int)(total*((pokers.length)/7));
+				return  (int)(jetton*((pokers.length)/7));
 			case TONGHUASHUN:
 				if(pub_state == TONGHUASHUN){
 					raise_num = 0;
 				}else if(pub_prestate != ZHUNTONGHUASHUN){
-					return (int)(total*(1/(8-pokers.length)));
+					return (int)(jetton*(1/(8-pokers.length)));
 				}else{
 					raise_num = max_raise;
 				}
@@ -443,7 +456,7 @@ public class Ai {
 						raise_num = 0;
 					}
 				}else if(pub_state != SANTIAO || pub_prestate != ZHUNTONGHUASHUN){
-					return (int)(total*(1/(8-pokers.length)));
+					return (int)(jetton*(1/(8-pokers.length)));
 				}else{
 					raise_num = max_raise;
 				}
@@ -452,7 +465,7 @@ public class Ai {
 				if(pub_state == HULU){
 					raise_num = 0;
 				}else if(pub_state != SANTIAO || pub_prestate != ZHUNTONGHUASHUN){
-					return (int)(total*(1/(8-pokers.length)));
+					return (int)(jetton*(1/(8-pokers.length)));
 				}else{
 					raise_num = max_raise;
 				}
@@ -461,7 +474,7 @@ public class Ai {
 				if(pub_state == TONGHUA){
 					raise_num = 0;
 				}else if(pub_prestate!=ZHUNTONGHUASHUN || pub_prestate!=ZHUNTONGHUA || pub_state != SANTIAO || pub_state != DUIZI){
-					return (int)(total*(1/(8-pokers.length)));
+					return (int)(jetton*(1/(8-pokers.length)));
 				}else if(pub_prestate == ZHUNTONGHUASHUN){
 					raise_num = max_raise/5;
 				}else if(pub_prestate == SANTIAO){
@@ -478,7 +491,7 @@ public class Ai {
 				if(pub_state == SHUNZI){
 					raise_num = 0;
 				}else if(pub_prestate!=ZHUNTONGHUASHUN ||pub_prestate != ZHUNTONGHUA || pub_prestate != ZHUNSHUNZI || pub_state != SANTIAO || pub_state != TWODUIZI || pub_state != DUIZI){
-					return (int)(total*(1/(8-pokers.length)));
+					return (int)(jetton*(1/(8-pokers.length)));
 				}else if(pub_prestate == ZHUNTONGHUASHUN){
 					raise_num = max_raise/7;
 				}else if(pub_prestate == ZHUNTONGHUA){
@@ -579,8 +592,8 @@ public class Ai {
 	 */
 	public double getRichState(){
 		double richstate = GENERAL;
-		int standard = 2000;
-		if(money == 0){
+		int standard = startjetton/5;
+		if(total < standard){
 			richstate = POOREST;
 		}else if(total < standard * 2 ){
 			richstate = POOR;
@@ -597,15 +610,15 @@ public class Ai {
 	public String inquire1(String[][] s){
 		String act = "";
 		int bet = getBet(s); 
-		int state = Checkstate.checkState(pokes);
+		int state = Checkstate.checkState(self_pokes);
 		int safety = getSafety(state, getSelfPokes());
 		int raise_num = getRaise(state, pokes[0].getnum(), pokes[1].getnum(), bet);
 		if(raise_num > 0){
 			act=action(raise,raise_num);
-			total = total-raise_num-bet;
+			jetton = jetton-raise_num-bet;
 		}else if(safety >= bet){
 			act=action(call,0);
-			total -= bet;
+			jetton -= bet;
 		}else{
 			act=action(fold,0);
 		}
@@ -624,10 +637,10 @@ public class Ai {
 		int raise_num = getRaise(getPokes(),getPubPokes(),getSelfPokes(), bet);
 		if(raise_num > 0){
 			act=action(raise,raise_num);
-			total = total-raise_num-bet;
+			jetton = jetton-raise_num-bet;
 		}else if(safety >= bet){
 			act=action(call,0);
-			total -= bet;
+			jetton -= bet;
 		}else{
 			act=action(fold,0);
 		}
@@ -647,16 +660,21 @@ public class Ai {
 	public void e_potwin(){
 		for(int i =0;i<7;i++){
 			pokes[i]=null;
+			
+		}
+		for(int i=0;i<5;i++){
 			pub_pokes[i]=null;
 		}
+		self_pokes[0]=null;
+		self_pokes[1]=null;
 		needfold=false;
 	}
 	private void sort(Poker[] p){//锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷写哟锟叫★拷锟斤拷锟斤拷锟�
 		//Poker[] tmp = new Poker[7];
 		int count=0;
 		for(int i=0;i<p.length;i++){
-			if(p[6]!=null){
-				count=7;
+			if(p[p.length-1]!=null){
+				count=p.length;
 				break;
 			}
 			if (p[i]==null){

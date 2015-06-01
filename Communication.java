@@ -1,15 +1,14 @@
-package run;
 import java.io.*;
 import java.net.*;
 import java.util.*;
 public class Communication {
 	/*
-		瀛樺偍鍚勭娑堟伅鐨勬暟缁勶細
-		1.搴т綅淇℃伅锛歋tring seatMeg[8][4]
-		2.鎵嬬墝淇℃伅锛歅oker holdMeg[2]
-		3.inquire淇℃伅锛歋tring inquireMeg[8][5];
-		5.blind娑堟伅锛歋tring blindMeg[2][2];
-		6.flop娑堟伅锛歅oker flopMeg[3];
+		存储各种消息的数组：
+		1.座位信息：String seatMeg[8][4]
+		2.手牌信息：Poker holdMeg[2]
+		3.inquire信息：String inquireMeg[8][5];
+		5.blind消息：String blindMeg[2][2];
+		6.flop消息：Poker flopMeg[3];
 	*/
 	private String seatMeg[][];
 	private Poker holdMeg[];
@@ -26,19 +25,19 @@ public class Communication {
 	private byte[] remoteBuf;
 	private byte[] localBuf;
 	
-	private int inquireSym;//鐢ㄦ潵鏍囪闇�浣跨敤鍝竴娆nquire鏂规硶
-	private int index;//鐢ㄦ潵鏍囪瀛樺偍娑堟伅鏁扮粍鐨勪笅鏍�
-	private int state=0;//鐢ㄦ潵鏍囪寮�鎺ユ敹鏌愮娑堟伅锛�:寮�鎺ユ敹娑堟伅锛�锛氭鍦ㄦ帴鏀舵秷鎭�
-	private	int choose=0;//鏍囪娑堟伅绫诲瀷
+	private int inquireSym;//用来标记需要使用哪一次inquire方法
+	private int index;//用来标记存储消息数组的下标
+	private int state=0;//用来标记开始接收某种消息；0:开始接收消息；1：正在接收消息。
+	private	int choose=0;//标记消息类型
 	
 	Ai controller;
 	
 	public Communication(String args[]){
-		//鍒濆鍖栫浉鍏冲弬鏁�
+		//初始化相关参数
 		controller =new Ai();
 		index=0;
-		remoteport=Integer.parseInt(args[1]);//鏈嶅姟鍣ㄧ鍙�
-		localport=Integer.parseInt(args[3]);//鏈湴绔彛
+		remoteport=Integer.parseInt(args[1]);//服务器端口
+		localport=Integer.parseInt(args[3]);//本地端口
 		String[] remoteStr = args[0].split("\\.");
 		String[] localStr = args[2].split("\\.");
 		remoteBuf = new byte[4];
@@ -54,47 +53,87 @@ public class Communication {
 		}
 	}
 	public void connect(){
-		try{
+		
 			socket = new Socket(); 
-			socket.setReuseAddress(true); 
-			socket.bind(new InetSocketAddress(InetAddress.getByAddress(localBuf),localport)); 
-			socket.connect(new InetSocketAddress(InetAddress.getByAddress(remoteBuf), remoteport));
+			try {
+				socket.setReuseAddress(true);
+				socket.setTcpNoDelay(true);
+			} catch (SocketException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} 
+			try {
+				socket.bind(new InetSocketAddress(InetAddress.getByAddress(localBuf),localport));
+			} catch (UnknownHostException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} 
+			try {
+				socket.connect(new InetSocketAddress(InetAddress.getByAddress(remoteBuf), remoteport));
+			} catch (UnknownHostException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			try {
+				input=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			try {
+				output=new DataOutputStream(socket.getOutputStream());
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			//发送注册消息			
+		String reg="reg: "+pid+" Bob \n";
+//			System.out.println(reg);
+			try {
+				output.write(reg.getBytes());
+				output.flush();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
-			input=new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			output=new DataOutputStream(socket.getOutputStream());
-			//鍙戦�娉ㄥ唽娑堟伅			
-			String reg="reg: "+pid+" Bob \n";
-			System.out.println(reg);
-			output.write(reg.getBytes());
-			output.flush();
-			//鎺ュ彈鏈嶅姟鍣ㄥ彂閫佸洖鏉ョ殑娑堟伅
-			try{
+			//接受服务器发送回来的消息
+			
 				while(true){
-					String temp=input.readLine();
-				//	System.out.println("鏈嶅姟鍣ㄨ繑鍥�"+temp);
+					String temp="";
+					try {
+						temp = input.readLine();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						try {
+							input.close();
+							output.close();
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						e.printStackTrace();
+					}
+//					System.out.println("服务器返回:"+temp);
 					if(state==0){
-						//鍒ゆ柇鎺ユ敹鐨勬槸鍝竴绉嶇被鍨嬬殑娑堟伅锛氬骇浣嶄俊鎭紵鐩叉敞淇℃伅锛�..
+						//判断接收的是哪一种类型的消息：座位信息？盲注信息？...
 						choose=judgeType(temp);
-						System.out.println("choose:"+choose);
-						if(choose==0)//娓告垙缁撴潫
+					//	System.out.println("tempMeg:"+temp);
+					//	System.out.println("choose:"+choose);
+						if(choose==0)//游戏结束
 							break;
 						state=1;
 					}else{
-						//寰楀埌娑堟伅绫诲瀷鍚庯紝灏嗚绫诲瀷娑堟伅鏆傛椂瀛樻斁鑷虫暟缁勪腑锛屽綋鏈璇ョ被鍨嬫秷鎭帴鏀跺畬姣曪紝鍚姩鐩稿簲鐨勫鐞嗙▼搴�
+						//得到消息类型后，将该类型消息暂时存放至数组中，当本次该类型消息接收完毕，启动相应的处理程序	
 						state=storeMeg(temp,choose);
 					}
 				}
-				input.close();
-				output.close();
-			}
-			//鍏抽棴杈撳叆杈撳嚭娴�
-			catch(Exception e){
-				input.close();
-				output.close();
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
 		if(socket!=null){
 			try{
 				socket.close();
@@ -105,53 +144,53 @@ public class Communication {
 			}
 		}
 	}
-	//鍒ゆ柇骞惰繑鍥炴秷鎭被鍨�
+	//判断并返回消息类型
 	public int judgeType(String meg){
 		if(meg.equals("seat/ ")){
-			System.out.println("鏈嶅姟鍣ㄨ繑鍥�"+meg);
-			inquireSym=0;//闇�浣跨敤inquire1;
+	//		System.out.println("服务器返回:"+meg);
+			inquireSym=0;//需要使用inquire1;
 			seatMeg=new String[8][];
 			return 1;
 		}
 		else if(meg.equals("blind/ ")){
-			System.out.println("鏈嶅姟鍣ㄨ繑鍥�"+meg);
+	//		System.out.println("服务器返回:"+meg);
 			blindMeg=new String[2][];
 			return 2;
 		}
 		else if(meg.equals("hold/ ")){
-			System.out.println("鏈嶅姟鍣ㄨ繑鍥�"+meg);
+	//		System.out.println("服务器返回:"+meg);
 			holdMeg=new Poker[2];
 			return 3;
 		}
 		else if(meg.equals("inquire/ ")){
-			System.out.println("鏈嶅姟鍣ㄨ繑鍥�"+meg);
-			inquireMeg=new String[8][];
+	//		System.out.println("服务器返回:"+meg);
+			inquireMeg=new String[9][];
 			return 4;
 		}
 		else if(meg.equals("flop/ ")){
-			System.out.println("鏈嶅姟鍣ㄨ繑鍥�"+meg);
+	//		System.out.println("服务器返回:"+meg);
 			flopMeg=new Poker[3];
-			inquireSym=1;//闇�浣跨敤inquire2
+			inquireSym=1;//需要使用inquire2
 			return 5;
 		}
 		else if(meg.equals("turn/ ")){
-			System.out.println("鏈嶅姟鍣ㄨ繑鍥�"+meg);
+	//		System.out.println("服务器返回:"+meg);
 			return 6;
 		}
 		else if(meg.equals("river/ ")){
-			System.out.println("鏈嶅姟鍣ㄨ繑鍥�"+meg);
+	//		System.out.println("服务器返回:"+meg);
 			return 7;
 		}
 		else if(meg.equals("showdown/ ")){
-			System.out.println("鏈嶅姟鍣ㄨ繑鍥�"+meg);
+	//		System.out.println("服务器返回:"+meg);
 			return 8;
 		}
 		else if(meg.equals("pot-win/ ")){
-			System.out.println("鏈嶅姟鍣ㄨ繑鍥�"+meg);
+		//	System.out.println("服务器返回:"+meg);
 			return 9;
 		}
-		else if(meg.equals("game-over ")){//濡傛灉鏈嶅姟鍣ㄨ繑鍥瀏ameover锛岃〃绀烘父鎴忕粨鏉熴�
-			System.out.println("鏈嶅姟鍣ㄨ繑鍥�"+meg);
+		else if(meg.equals("game-over ")){//如果服务器返回gameover，表示游戏结束。
+	//		System.out.println("服务器返回:"+meg);
 			return 0;
 		}
 		return 0;
@@ -159,7 +198,7 @@ public class Communication {
 	public int storeMeg(String meg,int choose){
 		switch(choose){
 			/*
-				鍌ㄥ瓨seat娑堟伅锛屽苟涓旀墽琛宔_seat绋嬪簭锛�
+				储存seat消息，并且执行e_seat程序；
 			*/
 			case 1:
 				if(meg.equals("/seat ")){
@@ -194,7 +233,7 @@ public class Communication {
 					return 1;
 				}
 			/*
-			 * 鎺ユ敹blind淇℃伅锛屾帴鏀跺畬姣曚箣鍚庡紑濮嬪鐞哹lind淇℃伅
+			 * 接收blind信息，接收完毕之后开始处理blind信息
 			 * */
 			case 2:
 				if(meg.equals("/blind ")){
@@ -209,7 +248,7 @@ public class Communication {
 					return 1;
 				}
 			/*
-			 * 鎺ユ敹hold淇℃伅骞朵笖澶勭悊
+			 * 接收hold信息并且处理
 			 * */
 			case 3:
 				if(meg.equals("/hold ")){
@@ -227,7 +266,7 @@ public class Communication {
 						return 1;
 				}
 			/*
-			 * 鎺ユ敹inquire淇℃伅锛屾帴鏀跺畬姣曞悗璋冪敤澶勭悊inquire鐨勬柟娉�
+			 * 接收inquire信息，接收完毕后调用处理inquire的方法
 			 * */
 			case 4:
 				if(meg.equals("/inquire ")){
@@ -256,15 +295,17 @@ public class Communication {
 					return 1;
 				}		
 			/*
-			 * 鎺ユ敹flop娑堟伅骞朵笖澶勭悊
+			 * 接收flop消息并且处理
 			 * */
 			case 5:
 				if(meg.equals("/flop ")){
 					controller.e_flop(flopMeg);
+	//				System.out.println("flopMeg:"+meg);
 					index=0;
 					flopMeg=null;
 					return 0;
 				}else{
+				//	System.out.println("flopMeg:"+meg);
 					String tempMeg[]=meg.split(" ");
 					Poker poke=judgeTypeAndNum(tempMeg);
 					flopMeg[index]=poke;
@@ -272,7 +313,7 @@ public class Communication {
 					return 1;
 				}
 			/*
-			 * 	鎺ユ敹turn娑堟伅骞朵笖澶勭悊
+			 * 	接收turn消息并且处理
 			 * */
 			case 6:
 				if(meg.equals("/turn ")){
@@ -280,11 +321,13 @@ public class Communication {
 				}else{
 					String temp[]=meg.split(" ");
 					Poker poke=judgeTypeAndNum(temp);
+				//	System.out.println("poke"+poke.getnum()+"  "+poke.gettype());
 					controller.e_turn(poke);
+					
 					return 1;
 				}
 			/*
-			 * 鎺ユ敹river娑堟伅骞朵笖澶勭悊
+			 * 接收river消息并且处理
 			 * */
 			case 7:
 				if(meg.equals("/river ")){
@@ -296,7 +339,7 @@ public class Communication {
 					return 1;
 				}
 			/*
-			 * 鎺ユ敹showdown娑堟伅锛氫笉闇�杩涜澶勭悊
+			 * 接收showdown消息：不需要进行处理
 			 * */
 			case 8:
 				if(meg.equals("/showdown ")){
@@ -304,7 +347,7 @@ public class Communication {
 				}else
 					return 1;
 			/*
-			 * 鎺ユ敹pot-win娑堟伅
+			 * 接收pot-win消息
 			 * */
 			case 9:
 				if(meg.equals("/pot-win ")){
@@ -317,7 +360,7 @@ public class Communication {
 		return 0;
 	}	
 	public Poker judgeTypeAndNum(String temp[]){
-		//鍒ゆ柇鑺辫壊
+		//判断花色
 		int type=0;
 		int num=2;
 		if(temp[0].equals("SPADES"))
@@ -328,7 +371,7 @@ public class Communication {
 			type=2;
 		else if(temp[0].equals("HEARTS"))
 			type=3;
-		//鍒ゆ柇鐐规暟
+		//判断点数
 		if(temp[1].equals("J"))
 			num=11;
 		else if(temp[1].equals("Q"))
