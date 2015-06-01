@@ -7,14 +7,56 @@ public class Ai {
 	final public static int check=3;
 	Poker[] pokes = new Poker[7];//锟斤拷锟斤拷锟斤拷
 	Poker[] pub_pokes = new Poker[5];//锟斤拷锟斤拷锟斤拷
+	Poker[] self_pokes = new Poker[2];
 	//String[][] seats;//锟斤拷锟斤拷锟捷憋拷
 	int pid=0;//锟皆硷拷锟斤拷ID
 	int jetton=0,money=0,lastjetton=0;//jetton锟皆硷拷剩锟斤拷亩慕锟�money锟皆硷拷剩锟斤拷锟角� lastjetton锟较家碉拷锟斤拷注锟斤拷
 	boolean needfold=false;//锟借不锟斤拷要直锟斤拷fold
 	double safety=0;//锟斤拷注锟斤拷全值 系锟斤拷
-	double n_safe=0.3;//锟斤拷全值系锟斤拷 锟轿匡拷锟斤拷小
-	int safebet=0;
+	double n_safe=0.15;//锟斤拷全值系锟斤拷 锟轿匡拷锟斤拷小
+	int safebet=0,total=0;
 	int state=0;//0-9锟斤拷示锟狡碉拷锟斤拷锟酵达拷小
+	final public static int MIN_SAFETY = 100;
+	final public static double SAFETY_FIGURE = 0.001; //
+	final public static double MAX_RAISE = 5000;
+	final public static double RAISE_FIGURE = 1;
+	final public static double POOREST = 0.2;
+	final public static double POOR = 0.4;
+	final public static double GENERAL = 0.6;
+	final public static double MIDDLERICH = 0.8;
+	final public static double RICH = 1;
+	
+	final public  static int GAOPAI = Checkstate.GAOPAI;
+
+	final public static int DUIZI = Checkstate.DUIZI;
+
+	final public  static int TWODUIZI = Checkstate.TWODUIZI;
+
+	final public static int SANTIAO = Checkstate.SANTIAO;
+
+	final public  static int SHUNZI = Checkstate.SHUNZI;
+
+	final public static int TONGHUA = Checkstate.TONGHUA;
+
+	final public  static int HULU = Checkstate.HULU;
+	
+	final public static int SITIAO = Checkstate.SITIAO;
+	
+	final public  static int TONGHUASHUN = Checkstate.TONGHUASHUN;
+	
+	final public static int HUANJIATONGHUASHUN = Checkstate.HUANJIATONGHUASHUN;
+	
+	final public static int ZHUNTONGHUASHUN = Checkstate.ZHUNTONGHUASHUN;
+
+	final public static int ZHUNTONGHUA = Checkstate.ZHUNTONGHUA;
+
+	final public static int ZHUNSHUNZI = Checkstate.ZHUNSHUNZI;
+	
+	final public static int THREETONGHUA = Checkstate.THREETONGHUA;
+	
+	final public static int THREESHUNZI = Checkstate.THREESHUNZI;
+	
+	
 	//每一锟街匡拷始执锟叫的筹拷始锟斤拷
 	public void e_seat(String[][] s,int p){
 		int m = s.length;
@@ -32,11 +74,12 @@ public class Ai {
 				money=Integer.parseInt(s[k][3]);//锟斤拷取锟皆硷拷剩锟斤拷锟角�
 			}
 		}
+		total=jetton+money;
 	}
 	private void danger_control(int bet){//危锟秸匡拷锟斤拷
-		if(jetton<=100)
+		if(total<=2000)
 			needfold=true;
-		safety=bet/(double)money;
+		safety=bet/(double)jetton;
 	}
 	private String action(int a,int b){//锟斤拷应锟斤拷锟斤拷
 		String str = "";
@@ -59,56 +102,514 @@ public class Ai {
 		}
 	}
 	public void e_hold(Poker[] p){//锟矫碉拷锟皆硷拷锟斤拷锟斤拷锟斤拷
-		pokes[0]=p[0];
-		pokes[1]=p[1];
-		sort(pokes); //锟斤拷锟斤拷锟斤拷锟斤拷
+		pokes[0]=p[0];self_pokes[0]=p[0];
+		pokes[1]=p[1];self_pokes[1]=p[1];
+		sort(pokes); sort(self_pokes);//锟斤拷锟斤拷锟斤拷锟斤拷
 	}
+	
+	
+	/**
+	 * 得到轮到自己的时候需要下的赌金,call时需要下的赌金
+	 * @param s   
+	 * @return
+	 */
+	public int getBet(String[][] s){
+		int b=0;
+		for(int i=0;i<s.length;i++){
+			if(s[i]!=null && s[i].length==5){
+				if(b<Integer.parseInt(s[i][3])){
+					b=Integer.parseInt(s[i][3]);
+				}
+			}
+		}
+		return b;
+	}
+	
+	/**
+	 * 得到公共牌堆的牌
+	 * @return
+	 */
+	public Poker[] getPubPokes(){
+		Poker[] pub_pokes1 = null;
+		int count=0;
+		for(int i=0;i<pub_pokes.length;i++){
+			if(pub_pokes[i]==null){
+				break;
+			}
+			else{
+				count++;
+			}
+		}
+		pub_pokes1 = new Poker[count];
+		for(int j=0;j<count;j++){
+			pub_pokes1[j]=pub_pokes[j];
+		}
+		return pub_pokes1;
+	}
+	
+	public Poker[] getSelfPokes(){
+		return self_pokes;
+	}
+	
+	public Poker[] getPokes(){
+		Poker[] pokes1 = null;
+		int count=0;
+		for(int i=0;i<pokes.length;i++){
+			if(pokes[i]==null){
+				break;
+			}
+			else{
+				count++;
+			}
+		}
+		pokes1 = new Poker[count];
+		for (int j=0;j<count;j++){
+			pokes1[j]=pokes[j];
+		}
+		return pokes1;
+	}
+	
+	/**
+	 * 实现安全轧值的动态更新
+	 * @param state   当前状态
+	 * @param max_num   最大牌的值
+	 * @param second_num 第二大牌的值
+	 * @param min_safety   设定安全轧值的基数
+	 * @param safety_figure     可设置轧值系数
+	 * @return 安全轧值
+	 */
+	public int getSafety(int state, Poker[] self_pokes){
+		double richstate = getRichState();
+		int max_num = self_pokes[0].getnum();
+		int second_num = self_pokes[1].getnum();
+		int minSafety = (int)(MIN_SAFETY * richstate);
+		if(minSafety > total){
+			minSafety = total;
+		}
+		int safety = 0;
+		if(state == GAOPAI){
+			if(max_num<10){
+				return 0;
+			}else if(second_num<10){
+				safety = minSafety;
+			}else if(second_num >= 10){
+				safety = (int) (total*SAFETY_FIGURE*(max_num-10));
+			}
+		}else if(state ==  DUIZI){
+			if(max_num == 14){
+				safety = total;
+			}else if(max_num == 13){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else{
+				safety = (int) (total*SAFETY_FIGURE*max_num + minSafety);
+			}
+			
+		}
+		return safety;
+	}
+	
+	public int getSafety(Poker[] pokers, Poker[] pub_pokers, Poker[] self_pokers){
+		double richstate = getRichState();
+		int minSafety = (int)(MIN_SAFETY * richstate);
+		if(minSafety > total){
+			minSafety = total;
+		}
+		int safety = 0;
+		int state = Checkstate.checkState(pokers);
+		int pub_state = Checkstate.checkState(pub_pokers);
+		int pub_prestate = Checkstate.checkprestate(pub_pokers);
+		int prestate = Checkstate.checkprestate(pokers);
+		switch(state){
+		case HUANJIATONGHUASHUN:
+			safety = total;
+		case TONGHUASHUN:
+			if(pub_state == TONGHUASHUN){
+				safety = 0;
+			}else if(pub_prestate != ZHUNTONGHUASHUN){
+				safety = total;
+			}else{
+				safety = total/2>minSafety?total/2:minSafety;
+			}
+			break;
+		case SITIAO:
+			if(pub_state == SITIAO){
+				if(self_pokers[0].getnum() > 12){
+					safety = (int) (total * SAFETY_FIGURE * (self_pokers[0].getnum() - 12));
+				}else{
+					safety = 0;
+				}
+			}else if(pub_state != SANTIAO){
+				safety = total;
+			}else{
+				safety = total/2>minSafety?total/2:minSafety;
+			}
+			break;
+		case HULU:
+			if(pub_state == HULU){
+				safety = 0;
+			}else if(pub_state != SANTIAO){
+				safety = total;
+			}else{
+				safety = total/2>minSafety?total/2:minSafety;
+			}
+			break;
+		case TONGHUA:
+			if(pub_state == TONGHUA){
+				safety = 0;
+			}else if(pub_prestate!=ZHUNTONGHUASHUN || pub_prestate!=ZHUNTONGHUA || pub_state != SANTIAO || pub_state != DUIZI){
+				safety = total;
+			}else if(pub_prestate == ZHUNTONGHUASHUN){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_prestate == SANTIAO){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_state == ZHUNTONGHUA){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_state == DUIZI){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else{
+				safety = total;
+			}
+			break;
+		case SHUNZI:
+			if(pub_state == SHUNZI){
+				safety = 0;
+			}else if(pub_prestate!=ZHUNTONGHUASHUN ||pub_prestate != ZHUNTONGHUA || pub_prestate != ZHUNSHUNZI || pub_state != SANTIAO || pub_state != TWODUIZI || pub_state != DUIZI){
+				safety = total;
+			}else if(pub_prestate == ZHUNTONGHUASHUN){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_prestate == ZHUNTONGHUA){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_state == SANTIAO){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_prestate == TWODUIZI){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_prestate == ZHUNSHUNZI){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_state == DUIZI){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else{
+				safety = total;
+			}
+			break;
+		case SANTIAO:
+			if(pub_state == SANTIAO){
+				if(self_pokers[0].getnum() == 14){
+					safety = total;
+				}else if(self_pokers[0].getnum() == 13){
+					safety = total/2>minSafety?total/2:minSafety;
+				}else{
+					safety = 0;
+				}
+			}else if(pub_prestate == ZHUNTONGHUASHUN){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_state == TWODUIZI){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_prestate == ZHUNTONGHUA){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_prestate == ZHUNSHUNZI){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_state == DUIZI){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else{
+				safety = total;
+			}
+			break;
+		case TWODUIZI:
+			if(pub_state == TWODUIZI){
+				if(self_pokers[0].getnum() == 14){
+					safety = total;
+				}else if(self_pokers[0].getnum() == 13){
+					safety = total/2>minSafety?total/2:minSafety;
+				}else{
+					safety = 0;
+				}
+			}else if(pub_prestate == ZHUNTONGHUASHUN){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_prestate == ZHUNTONGHUA){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_prestate == ZHUNSHUNZI){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else if(pub_state == DUIZI){
+				safety = total/2>minSafety?total/2:minSafety;
+			}else{
+				safety = total;
+			}
+			break;
+		case DUIZI:
+			if(pub_state == DUIZI){
+				safety = 0;
+			}else{
+				int duizi_num = Checkstate.getNumDUIZI(pokers);
+				if(duizi_num > 10){
+					safety = (int) (MAX_RAISE*RAISE_FIGURE*duizi_num);
+					if(pub_prestate == ZHUNTONGHUASHUN){
+						safety = total/3>minSafety?total/3:minSafety;
+					}else if(pub_prestate == ZHUNTONGHUA){
+						safety = total/3>minSafety?total/3:minSafety;
+					}else if(pub_prestate == ZHUNSHUNZI){
+						safety = total/3>minSafety?total/3:minSafety;
+					}
+				}else{
+					safety = 0;
+				}
+			}
+			break;
+		case GAOPAI:
+			if(pokers.length == 5){
+				if(prestate == ZHUNTONGHUASHUN){
+					safety = total/2>minSafety?total/2:minSafety;
+				}else if(prestate == ZHUNSHUNZI || prestate == ZHUNTONGHUA){
+					safety = total/2>minSafety?total/2:minSafety;
+				}
+			}else if(pokers.length == 6){
+				if(prestate == ZHUNTONGHUASHUN){
+					safety = total/3>minSafety?total/3:minSafety;
+				}else if(prestate == ZHUNSHUNZI || prestate == ZHUNTONGHUA){
+					safety = total/3>minSafety?total/3:minSafety;
+				}
+			}else{
+				safety = 0;
+			}			
+			break;
+		default:
+			safety = minSafety;
+	}
+		return safety;
+	}
+	
+	
+	/**
+	 * 实现主动下注值raise的动态更新
+	 * @param state  当前状态
+	 * @param max_num  最大牌的值
+	 * @param second_num 第二大牌的值
+	 * @param bet  下注金额
+	 * @param raise_figure  设置下注系数
+	 * @return  主动下注值
+	 */
+	public int getRaise(int state, int max_num,int second_num, int bet){	
+		if(bet >= MAX_RAISE){
+			return 0;
+		}
+		int raise_num = 0;
+		double richstate = getRichState();
+		int max_raise = (int)(MAX_RAISE*richstate-bet);
+		
+		if(state == DUIZI){
+			raise_num = (int) (MAX_RAISE*RAISE_FIGURE*max_num);
+		}else if(state == GAOPAI){
+			if(second_num > 10){
+				raise_num = (int) (MAX_RAISE * RAISE_FIGURE * (second_num - 10));
+			}
+		}
+		if(raise_num > max_raise){
+			raise_num = max_raise;
+		}
+		return raise_num;
+	}
+	
+	
+	
+	public int getRaise(Poker[] pokers, Poker[] pub_pokers, Poker[] self_pokers, int bet){
+		if(bet >= MAX_RAISE){
+			return 0;
+		}
+		int raise_num = 0;
+		double richstate = getRichState();
+		int max_raise = (int)(MAX_RAISE*richstate - bet);
+		if(max_raise > total){
+			max_raise = total;
+		}
+		int state = Checkstate.checkState(pokers);
+		int pub_state = Checkstate.checkState(pub_pokers);
+		int pub_prestate = Checkstate.checkprestate(pub_pokers);
+		switch(state){
+			case HUANJIATONGHUASHUN:
+				return  (int)(total*((pokers.length)/7));
+			case TONGHUASHUN:
+				if(pub_state == TONGHUASHUN){
+					raise_num = 0;
+				}else if(pub_prestate != ZHUNTONGHUASHUN){
+					return (int)(total*(1/(8-pokers.length)));
+				}else{
+					raise_num = max_raise;
+				}
+				break;
+			case SITIAO:
+				if(pub_state == SITIAO){
+					if(self_pokers[0].getnum() > 12){
+						raise_num = (int) (MAX_RAISE * RAISE_FIGURE * (self_pokers[0].getnum() - 12));
+					}else{
+						raise_num = 0;
+					}
+				}else if(pub_state != SANTIAO || pub_prestate != ZHUNTONGHUASHUN){
+					return (int)(total*(1/(8-pokers.length)));
+				}else{
+					raise_num = max_raise;
+				}
+				break;
+			case HULU:
+				if(pub_state == HULU){
+					raise_num = 0;
+				}else if(pub_state != SANTIAO || pub_prestate != ZHUNTONGHUASHUN){
+					return (int)(total*(1/(8-pokers.length)));
+				}else{
+					raise_num = max_raise;
+				}
+				break;
+			case TONGHUA:
+				if(pub_state == TONGHUA){
+					raise_num = 0;
+				}else if(pub_prestate!=ZHUNTONGHUASHUN || pub_prestate!=ZHUNTONGHUA || pub_state != SANTIAO || pub_state != DUIZI){
+					return (int)(total*(1/(8-pokers.length)));
+				}else if(pub_prestate == ZHUNTONGHUASHUN){
+					raise_num = max_raise/5;
+				}else if(pub_prestate == SANTIAO){
+					raise_num = max_raise/4;
+				}else if(pub_state == ZHUNTONGHUA){
+					raise_num = max_raise/3;
+				}else if(pub_state == DUIZI){
+					raise_num = max_raise/2;
+				}else{
+					raise_num = max_raise;
+				}
+				break;
+			case SHUNZI:
+				if(pub_state == SHUNZI){
+					raise_num = 0;
+				}else if(pub_prestate!=ZHUNTONGHUASHUN ||pub_prestate != ZHUNTONGHUA || pub_prestate != ZHUNSHUNZI || pub_state != SANTIAO || pub_state != TWODUIZI || pub_state != DUIZI){
+					return (int)(total*(1/(8-pokers.length)));
+				}else if(pub_prestate == ZHUNTONGHUASHUN){
+					raise_num = max_raise/7;
+				}else if(pub_prestate == ZHUNTONGHUA){
+					raise_num = max_raise/6;
+				}else if(pub_state == SANTIAO){
+					raise_num = max_raise/5;
+				}else if(pub_prestate == TWODUIZI){
+					raise_num = max_raise/4;
+				}else if(pub_prestate == ZHUNSHUNZI){
+					raise_num = max_raise/3;
+				}else if(pub_state == DUIZI){
+					raise_num = max_raise/2;
+				}else{
+					raise_num = max_raise;
+				}
+				break;
+			case SANTIAO:
+				if(pub_state == SANTIAO){
+					if(self_pokers[0].getnum() > 12){
+						raise_num = (int) (MAX_RAISE * RAISE_FIGURE * (self_pokers[0].getnum() - 12));
+					}else{
+						raise_num = 0;
+					}
+				}else if(pub_prestate == ZHUNTONGHUASHUN){
+					raise_num = max_raise/6;
+				}else if(pub_state == TWODUIZI){
+					raise_num = max_raise/5;
+				}else if(pub_prestate == ZHUNTONGHUA){
+					raise_num = max_raise/4;
+				}else if(pub_prestate == ZHUNSHUNZI){
+					raise_num = max_raise/3;
+				}else if(pub_state == DUIZI){
+					raise_num = max_raise/2;
+				}else{
+					raise_num = max_raise;
+				}
+				break;
+			case TWODUIZI:
+				if(pub_state == TWODUIZI){
+					if(self_pokers[0].getnum() > 12){
+						raise_num = (int) (MAX_RAISE * RAISE_FIGURE * (self_pokers[0].getnum() - 12));
+					}else{
+						raise_num = 0;
+					}
+				}else if(pub_prestate == ZHUNTONGHUASHUN){
+					raise_num = max_raise/5;
+				}else if(pub_prestate == ZHUNTONGHUA){
+					raise_num = max_raise/4;
+				}else if(pub_prestate == ZHUNSHUNZI){
+					raise_num = max_raise/3;
+				}else if(pub_state == DUIZI){
+					raise_num = max_raise/2;
+				}else{
+					raise_num = max_raise;
+				}
+				break;
+			case DUIZI:
+				if(pub_state == DUIZI){
+					if(self_pokers[0].getnum() > 12){
+						raise_num = (int) (MAX_RAISE * RAISE_FIGURE * (self_pokers[0].getnum() - 12));
+					}else{
+						raise_num = 0;
+					}
+				}else{
+					int duizi_num = Checkstate.getNumDUIZI(pokers);
+					if(duizi_num > 10){
+						raise_num = (int) (MAX_RAISE*RAISE_FIGURE*duizi_num);
+						if(pub_prestate == ZHUNTONGHUASHUN){
+							raise_num = raise_num/5;
+						}else if(pub_prestate == ZHUNTONGHUA){
+							raise_num = raise_num/4;
+						}else if(pub_prestate == ZHUNSHUNZI){
+							raise_num = raise_num/3;
+						}
+					}else{
+						raise_num = 0;
+					}
+				}
+				break;
+			case GAOPAI:
+				if(self_pokers[0].getnum() > 12){
+					raise_num = (int) (MAX_RAISE * RAISE_FIGURE * (self_pokers[0].getnum() - 12));
+				}else{
+					raise_num = 0;
+				}
+				break;
+			default:
+				raise_num = 0;
+		}
+		if(raise_num > max_raise){
+			raise_num = max_raise;
+		}
+		return raise_num;
+	}
+	/**
+	 * 判断现在富有状态。分5种状态:特穷，穷，一般，中产，富有，开局默认为一般
+	 * @return
+	 */
+	public double getRichState(){
+		double richstate = GENERAL;
+		int standard = 2000;
+		if(money == 0){
+			richstate = POOREST;
+		}else if(total < standard * 2 ){
+			richstate = POOR;
+		}else if(total < standard * 5){
+			richstate = GENERAL;
+		}else if(total < standard * 10){
+			richstate = MIDDLERICH;
+		}else{
+			richstate = RICH;
+		}
+		return richstate;
+	}
+	
 	public String inquire1(String[][] s){
-		lastjetton=Integer.parseInt(s[0][3]);//锟斤拷一锟揭碉拷锟斤拷注锟斤拷
-		danger_control(lastjetton);
 		String act = "";
-		if(needfold==true){//危锟秸匡拷锟斤拷
+		int bet = getBet(s); 
+		int state = Checkstate.checkState(pokes);
+		int safety = getSafety(state, getSelfPokes());
+		int raise_num = getRaise(state, pokes[0].getnum(), pokes[1].getnum(), bet);
+		if(raise_num > 0){
+			act=action(raise,raise_num);
+			total = total-raise_num-bet;
+		}else if(safety >= bet){
+			act=action(call,0);
+			total -= bet;
+		}else{
 			act=action(fold,0);
-			return act;
 		}
-		if(pokes[0].getnum()==pokes[1].getnum()){//锟斤拷锟斤拷锟揭伙拷锟斤拷锟斤拷锟�
-			if(pokes[0].getnum()<10){//锟斤拷锟斤拷小锟斤拷10
-				if(safety>n_safe)
-					act=action(fold,0);
-				else if(lastjetton<safebet)
-					act=action(call,0);
-				else 
-					act=action(fold,0);
-			}else if(pokes[0].getnum()>10){//锟斤拷锟接达拷锟斤拷10
-				if(safety>n_safe && lastjetton<safebet)
-					act=action(call,0);
-				else if(safety>n_safe && lastjetton>safebet)
-					act=action(fold,0);
-				else if(safety<n_safe && lastjetton<safebet)
-					act=action(raise,safebet/3);
-				else
-					act=action(call,0);
-			}
-			return act;
-		}
-		else if(Math.abs(pokes[0].getnum()-pokes[1].getnum())==1 || pokes[0].gettype()==pokes[1].gettype()){//锟斤拷锟斤拷锟斤拷锟斤拷诨锟斤拷锟酵拷锟�
-			if(lastjetton>safebet)
-				act=action(fold,0);
-			else
-				act=action(call,0);
-			return act;
-		}
-		else{//锟斤拷锟绞裁匆裁伙拷锟�
-			if(pokes[0].getnum()>10){
-				if(lastjetton<safebet)
-					act=action(call,0);
-				else
-					act=action(fold,0);
-			}
-			else
-				act=action(fold,0);
-			return act;
-		}
+		return act;
 	}
 	public void e_flop(Poker[] p){
 		pokes[2]=p[0];pub_pokes[0]=p[0];
@@ -117,136 +618,19 @@ public class Ai {
 		sort(pokes);sort(pub_pokes);
 	}
 	public String inquire2(String[][] s){
-		state=Checkstate.checkState(pokes);//锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟�
-		int[] st=Pub_check.check(pub_pokes);//锟叫断癸拷锟斤拷锟狡讹拷锟斤拷锟斤拷锟斤拷锟斤拷
-		lastjetton=Integer.parseInt(s[0][3]);//锟斤拷一锟揭碉拷锟斤拷注锟斤拷
-		danger_control(lastjetton);
 		String act = "";
-		if(needfold==true){//危锟秸匡拷锟斤拷
+		int bet = getBet(s); 
+		int safety = getSafety(getPokes(),getPubPokes(),getSelfPokes());
+		int raise_num = getRaise(getPokes(),getPubPokes(),getSelfPokes(), bet);
+		if(raise_num > 0){
+			act=action(raise,raise_num);
+			total = total-raise_num-bet;
+		}else if(safety >= bet){
+			act=action(call,0);
+			total -= bet;
+		}else{
 			act=action(fold,0);
-			return act;
 		}
-		if(state>5){//锟斤拷锟斤拷锟斤拷
-			if(state==6){//锟斤拷锟斤拷+锟斤拷锟斤拷
-				if(st[0]==Pub_check.santiao || st[0]==Pub_check.duizi){
-					if(lastjetton<safebet){
-						act=action(call,0);
-					}
-					else{
-						act=action(fold,0);
-					}
-				}
-			}
-			else if(state==7){//炸锟斤拷
-				if(st[0]==Pub_check.zhadan){//锟斤拷锟秸拷锟饺拷诠锟斤拷锟斤拷贫锟斤拷锟斤拷锟�
-					if(lastjetton<safebet){
-						act=action(call,0);
-					}
-					else{
-						act=action(fold,0);
-					}
-				}
-				else if(st[0]==Pub_check.santiao || st[0]==Pub_check.duizi){//锟斤拷锟秸拷锟斤拷锟斤拷锟斤拷呕锟斤拷锟斤拷锟斤拷锟斤拷诠锟斤拷锟斤拷哦锟斤拷锟斤拷锟�
-					if(lastjetton<jetton/2){
-						act=action(raise,jetton/2);
-					}
-					else{
-						act=action(call,0);
-					}
-				}
-			}
-			else{
-				if(lastjetton<jetton/2){
-					act=action(raise,jetton/2);
-				}
-				else{
-					act=action(call,0);
-				}
-			}
-		}
-		
-		
-		else if(state==5){//同锟斤拷
-			if(lastjetton<jetton/3){
-				act=action(raise,jetton/3);
-			}
-			else{
-				act=action(call,0);
-			}
-		}
-		
-		
-		else if(state==4){//锟斤拷锟斤拷锟剿筹拷锟�
-			if(pokes[0].getnum()>=12){//锟斤拷锟斤拷锟斤拷拼锟斤拷锟絁
-				if(lastjetton<jetton/3){
-					act=action(raise,jetton/3);
-				}
-				else{
-					act=action(call,0);
-				}
-			}
-			else{
-				if(lastjetton<jetton/3){
-					act=action(raise,safebet);//raise锟斤拷微锟劫碉拷
-				}
-				else{
-					act=action(call,0);
-				}
-			}
-		}
-		
-		else if(state==3){//锟斤拷锟斤拷
-			if(st[0]==Pub_check.santiao){
-				if(lastjetton<safebet){
-					act=action(call,0);
-				}
-				else{
-					act=action(fold,0);
-				}
-			}
-			else{
-				if(lastjetton<safebet){
-					act=action(raise,safebet);
-				}
-				else{
-					act=action(call,0);
-				}
-			}
-		}
-		
-		
-		else if(state==2 || state==1){//锟斤拷锟斤拷锟接伙拷锟斤拷一锟斤拷锟斤拷
-			if(st[0]==Pub_check.duizi){
-				if(lastjetton<safebet){
-					act=action(call,0);
-				}
-				else{
-					act=action(fold,0);
-				}
-			}
-			else{
-				if(lastjetton<safebet){
-					act=action(raise,safebet);
-				}
-				else{
-					act=action(call,0);
-				}
-			}
-		}
-		
-		
-		else if(state==0){//什么也没锟斤拷
-			if(pub_pokes[3]==null){//锟斤拷锟斤拷贫锟斤拷锟斤拷锟街伙拷锟斤拷锟斤拷锟斤拷锟�锟斤拷锟斤拷锟叫碉拷锟狡硷拷锟斤拷锟斤拷锟斤拷锟侥革拷锟斤拷色锟斤拷同
-				if(Checkstate.checkprestate(pokes)==Checkstate.ZHUNTONGHUA || Checkstate.checkprestate(pokes)==Checkstate.ZHUNSHUNZI){
-					act=action(call,0);
-				}
-			}
-			else{
-				act=action(fold,0);
-			}
-		}
-		
-		
 		return act;
 	}
 	public void e_turn(Poker p){

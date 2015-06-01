@@ -1,4 +1,4 @@
-package run;
+﻿package run;
 
 public class Checkstate {
 
@@ -8,16 +8,16 @@ public class Checkstate {
 	final public  static int GAOPAI = 0;
 	
 	/**
-	 * 瀵瑰瓙锛屽嵆鏈変笖鍙湁涓�釜瀵瑰瓙
+	 * 瀵瑰瓙锛屽嵆鏈変笖鍙湁涓?釜瀵瑰瓙
 	 */
 	final public static int DUIZI = 1;
 	
 	/**
-	 * 涓ゅ瀛愶紝鍗虫湁涓斿彧鏈変袱涓瀛�
+	 * 涓ゅ瀛愶紝鍗虫湁涓斿彧鏈変袱涓瀛?
 	 */
 	final public  static int TWODUIZI = 2;
 	/**
-	 * 涓夋潯锛屽嵆鏈変笁涓竴鏍风殑鏁板�鐨勭墝
+	 * 涓夋潯锛屽嵆鏈変笁涓竴鏍风殑鏁板?鐨勭墝
 	 */
 	final public static int SANTIAO = 3;
 	/**
@@ -29,32 +29,44 @@ public class Checkstate {
 	 */
 	final public static int TONGHUA = 5;
 	/**
-	 *钁姦锛屽嵆鏈変竴涓笁鏉″拰涓�釜瀵瑰瓙
+	 *钁姦锛屽嵆鏈変竴涓笁鏉″拰涓?釜瀵瑰瓙
 	 */
 	final public  static int HULU = 6;
 	
 	/**
-	 * 鍥涙潯锛屽嵆鏈夊洓涓竴鏍锋暟鍊肩殑鐗�
+	 * 鍥涙潯锛屽嵆鏈夊洓涓竴鏍锋暟鍊肩殑鐗?
 	 */
 	final public static int SITIAO = 7;
 	
 	/**
-	 * 鍚岃姳椤�
+	 * 鍚岃姳椤?
 	 */
 	final public  static int TONGHUASHUN = 8;
 	
 	/**
-	 * 鐨囧鍚岃姳椤�鍗矨寮�ご鐨勫悓鑺遍『
+	 * 鐨囧鍚岃姳椤?鍗矨寮?ご鐨勫悓鑺遍『
 	 */
 	final public static int HUANJIATONGHUASHUN = 9;
+	
+	final public static int ZHUNTONGHUASHUN = -1;
 	/**
-	 * 鍑嗗悓鑺憋紝鍥涘紶鑺辫壊涓�牱
+	 * 鍑嗗悓鑺憋紝鍥涘紶鑺辫壊涓?牱
 	 */
-	final public static int ZHUNTONGHUA = -1;
+	final public static int ZHUNTONGHUA = -2;
 	/**
 	 * 鍑嗛『瀛愶紝鍥涘紶鍗曡繛
 	 */
-	final public static int ZHUNSHUNZI = -2;
+	final public static int ZHUNSHUNZI = -3;
+	
+	/**
+	 * 三张同花
+	 */
+	final public static int THREETONGHUA = -4;
+	
+	/**
+	 * 三张顺子
+	 */
+	final public static int THREESHUNZI = -5;
 	
 	public static int checkState(Poker[] poker){
 		if(checkHUANJIATONGHUASHUN(poker)){
@@ -87,12 +99,23 @@ public class Checkstate {
 		return GAOPAI;
 	}
 	
+	
+	
 	public static int checkprestate(Poker[] poker){
+		if(checkZHUNTONGHUASHUN(poker)){
+			return ZHUNTONGHUASHUN;
+		}
 		if(checkZHUNTONGHUA(poker)){
 			return ZHUNTONGHUA;
 		}
 		if(checkZHUNSHUNZI(poker)){
 			return ZHUNSHUNZI;
+		}
+		if(checkTHREETONGHUA(poker)){
+			return THREETONGHUA;
+		}
+		if(checkTHREESHUNZI(poker)){
+			return THREESHUNZI;
 		}
 		return GAOPAI;
 	}
@@ -267,10 +290,34 @@ public class Checkstate {
 		return isHUANJIATONGHUASHUN;
 	}
 	
+	
+	public static boolean checkZHUNTONGHUASHUN(Poker[] poker){
+		boolean isZHUNTONGHUASHUN = false;
+		int len = poker.length;
+		if(!checkZHUNTONGHUA(poker)|| !checkZHUNSHUNZI(poker) || len < 4){
+			return false;
+		}
+		for(int i=0; i<len-3; i++){
+			if(poker[i].gettype() == poker[i+1].gettype() && 
+					poker[i].gettype() == poker[i+2].gettype() && 
+					poker[i].gettype() == poker[i+3].gettype()){
+				if((poker[i].getnum() == (poker[i+1].getnum() + 1) && 
+						poker[i].getnum() == (poker[i+2].getnum() + 2) && 
+						poker[i].getnum() == (poker[i+3].getnum() + 3)) ||
+						(poker[i+1].getnum() == 3 && 
+						poker[i+2].getnum() == 2 && 
+						poker[len-1].getnum() == 14)){
+					isZHUNTONGHUASHUN = true;
+				}
+			}
+		}
+		return isZHUNTONGHUASHUN;
+	}
+	
 	public static boolean checkZHUNTONGHUA(Poker[] poker){
 		boolean isZHUNTONGHUA = false;
 		int len = poker.length;
-		if(len < 5 || len > 6){
+		if(len < 4 || len > 7){
 			return false;
 		}
 		for(int i=0,count=0; i<len; i++){
@@ -291,10 +338,10 @@ public class Checkstate {
 	public static boolean checkZHUNSHUNZI(Poker[] poker){
 		boolean isZHUNSHUNZI = false;
 		int len = poker.length;
-		if(len < 5 || len > 6){
+		if(len < 4 || len > 7){
 			return false;
 		}
-		for(int i=0; i<len; i++){
+		for(int i=0; i<len-3; i++){
 			if((poker[i].getnum() == (poker[i+1].getnum() + 1) && 
 					poker[i].getnum() == (poker[i+2].getnum() + 2) && 
 					poker[i].getnum() == (poker[i+3].getnum() + 3) ) ||
@@ -305,5 +352,58 @@ public class Checkstate {
 			}
 		}
 		return isZHUNSHUNZI;
+	}
+	
+	public static boolean checkTHREETONGHUA(Poker[] poker){
+		boolean isTHREETONGHUA = false;
+		int len = poker.length;
+		if(len<3 || len>7){
+			return false;
+		}
+		for(int i=0,count=0; i<len; i++){
+			for(int j=0; j<len; j++){
+				if(poker[i].gettype() == poker[j].gettype()){
+					count ++;
+				}
+			}
+			if(count == 3){
+				isTHREETONGHUA = true;
+				break;
+			}
+			count = 0;
+		}
+		return isTHREETONGHUA;
+	}
+	
+	public static boolean checkTHREESHUNZI(Poker[] poker){
+		boolean isTHREESHUNZI = false;
+		int len = poker.length;
+		if(len<3 || len>7){
+			return false;
+		}
+		for(int i=0; i<len-2; i++){
+			if((poker[i].getnum() == (poker[i+1].getnum() + 1) && 
+					poker[i].getnum() == (poker[i+2].getnum() + 2))||
+					(poker[i+2].getnum() == 2 && 
+					poker[len-1].getnum() == 14)){
+				isTHREESHUNZI = true;
+			}
+		}
+		return isTHREESHUNZI;
+	}
+	
+	public static int getNumDUIZI(Poker[] poker){
+		int len = poker.length;
+		if(len<3 || len>7){
+			return 0;
+		}
+		int duizi_num = 0;
+		for(int i=0; i<len-1; i++){
+			if(poker[i].getnum() == poker[i+1].getnum()){
+				duizi_num = poker[i+1].getnum();
+				break;
+			}
+		}
+		return duizi_num;
 	}
 }
