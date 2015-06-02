@@ -158,7 +158,7 @@ public class Communication {
 			return 2;
 		}
 		else if(meg.equals("hold/ ")){
-	//		System.out.println("服务器返回:"+meg);
+		//	System.out.println("手牌:"+meg);
 			holdMeg=new Poker[2];
 			return 3;
 		}
@@ -168,17 +168,17 @@ public class Communication {
 			return 4;
 		}
 		else if(meg.equals("flop/ ")){
-	//		System.out.println("服务器返回:"+meg);
+	//		System.out.println("flop:"+meg);
 			flopMeg=new Poker[3];
 			inquireSym=1;//需要使用inquire2
 			return 5;
 		}
 		else if(meg.equals("turn/ ")){
-	//		System.out.println("服务器返回:"+meg);
+	//		System.out.println("turn:"+meg);
 			return 6;
 		}
 		else if(meg.equals("river/ ")){
-	//		System.out.println("服务器返回:"+meg);
+	//		System.out.println("river:"+meg);
 			return 7;
 		}
 		else if(meg.equals("showdown/ ")){
@@ -257,6 +257,7 @@ public class Communication {
 					index=0;
 					return 0;
 				}else{
+						System.out.println("手牌："+meg);
 						int num=2;
 						int type=0;
 						String tempMeg[]=meg.split(" ");
@@ -305,7 +306,7 @@ public class Communication {
 					flopMeg=null;
 					return 0;
 				}else{
-				//	System.out.println("flopMeg:"+meg);
+					System.out.println("flop:"+meg);
 					String tempMeg[]=meg.split(" ");
 					Poker poke=judgeTypeAndNum(tempMeg);
 					flopMeg[index]=poke;
@@ -319,9 +320,9 @@ public class Communication {
 				if(meg.equals("/turn ")){
 					return 0;
 				}else{
+					System.out.println("turn:"+meg);
 					String temp[]=meg.split(" ");
 					Poker poke=judgeTypeAndNum(temp);
-				//	System.out.println("poke"+poke.getnum()+"  "+poke.gettype());
 					controller.e_turn(poke);
 					
 					return 1;
@@ -333,6 +334,8 @@ public class Communication {
 				if(meg.equals("/river ")){
 					return 0;
 				}else{
+					System.out.println("river:"+meg);
+					System.out.println("");
 					String temp[]=meg.split(" ");
 					Poker poke=judgeTypeAndNum(temp);
 					controller.e_river(poke);
@@ -351,6 +354,7 @@ public class Communication {
 			 * */
 			case 9:
 				if(meg.equals("/pot-win ")){
+					System.out.println("本局结束！");
 					controller.e_potwin();
 					return 0;
 				}else{

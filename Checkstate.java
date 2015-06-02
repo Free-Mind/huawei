@@ -175,8 +175,8 @@ public class Checkstate {
 					poker[i].getnum() == (poker[i+3].getnum() + 3) && 
 					poker[i].getnum() == (poker[i+4].getnum() + 4)) ||
 					(poker[i].getnum() == 4 && 
-					poker[i-1].getnum() == 3 && 
-					poker[i-2].getnum() == 2 && 
+					poker[i+1].getnum() == 3 && 
+					poker[i+2].getnum() == 2 && 
 					poker[len-1].getnum() == 14)){
 				isSHUNZI = true;
 			}
@@ -211,14 +211,23 @@ public class Checkstate {
 		if(!checkDUIZI(poker) || !checkSANTIAO(poker) || len < 5){
 			return false;
 		}
+		int tempNum = 0;
 		Poker[]  temp = new Poker[len-3];
 		for(int i=0, j=0; i<len-2; i++){
-			if(!(poker[i].getnum() == poker[i+1].getnum() && poker[i+1].getnum() == poker[i+2].getnum())){
-				temp[j] = poker[i];
-				j++;
+			if(poker[i].getnum() == poker[i+1].getnum() && poker[i+1].getnum() == poker[i+2].getnum()){
+				tempNum = poker[i].getnum();
+				for(int i2=0,j2=0;i2<len;i2++){
+					if(poker[i2].getnum() != tempNum){
+						temp[j2] = poker[i2];
+						j2++;
+					}
+				}
+				isHULU = checkDUIZI(temp);
+				break;
 			}
 		}
-		isHULU = checkDUIZI(temp);
+		
+	
 		return isHULU;
 	}
 	
