@@ -202,21 +202,36 @@ public class Ai {
 		int safety = 0;
 		if(state == GAOPAI){
 			if(max_num<10){
-				return 0;
+				if(self_pokes[0].gettype() == self_pokes[1].gettype() || self_pokes[0].getnum() == self_pokes[1].getnum()+1){
+					safety = minSafety*2;
+				}else{
+					safety = minSafety;
+				}
 			}else if(second_num<10){
-				safety = minSafety;
+				if(self_pokes[0].gettype() == self_pokes[1].gettype() || self_pokes[0].getnum() == self_pokes[1].getnum()+1){
+					safety = (int) (jetton*0.2>minSafety? jetton*0.2:minSafety);
+				}else{
+					safety = minSafety;
+				}
 			}else if(second_num >= 10){
-				safety = (int) (jetton*SAFETY_FIGURE*second_num);
+				if(self_pokes[0].gettype() == self_pokes[1].gettype() || self_pokes[0].getnum() == self_pokes[1].getnum()+1){
+					safety = (int) (jetton*0.5>minSafety? jetton*0.5:minSafety);
+				}else{
+					safety = minSafety*2;
+				}
 			}
 		}else if(state ==  DUIZI){
-			if(max_num == 14){
+			if(max_num > 12){
 				safety = jetton;
-			}else if(max_num == 13){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+			}else if(max_num > 10){
+				safety = (int) (jetton*0.8>minSafety? jetton*0.8:minSafety);
+			}else if(max_num > 8){
+				safety = (int) (jetton*0.4>minSafety? jetton*0.4:minSafety);
+			}else if(max_num > 6){
+				safety = (int) (jetton*0.2>minSafety? jetton*0.2:minSafety);
 			}else{
-				safety = (int) (jetton*SAFETY_FIGURE*max_num + minSafety);
+				safety = (int) (jetton*0.1>minSafety? jetton*0.1:minSafety);
 			}
-			
 		}
 		return safety;
 	}
@@ -237,69 +252,82 @@ public class Ai {
 			safety = jetton;
 		case TONGHUASHUN:
 			if(pub_state == TONGHUASHUN){
-				safety = 0;
+				safety = minSafety;
 			}else if(pub_prestate != ZHUNTONGHUASHUN){
 				safety = jetton;
 			}else{
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.8>minSafety? jetton*0.8:minSafety);
 			}
 			break;
 		case SITIAO:
 			if(pub_state == SITIAO){
-				if(self_pokers[0].getnum() > 12){
-					safety = (int) (jetton * SAFETY_FIGURE * (self_pokers[0].getnum() - 12));
+				if(self_pokers[0].getnum() == 14){
+					safety = jetton;
+				}else if(self_pokers[0].getnum() == 13){
+					safety = (int) (jetton*0.9>minSafety? jetton*0.9:minSafety);
+				}else if(self_pokers[0].getnum() == 12){
+					safety = (int) (jetton*0.4>minSafety? jetton*0.4:minSafety);
 				}else{
-					safety = 0;
+					safety = minSafety;
 				}
 			}else if(pub_state != SANTIAO){
 				safety = jetton;
 			}else{
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				if(self_pokers[0].getnum() == 14){
+					safety = jetton;
+				}else if(self_pokers[0].getnum() == 13){
+					safety = (int) (jetton*0.9>minSafety? jetton*0.9:minSafety);
+				}else if(self_pokers[0].getnum() == 12){
+					safety = (int) (jetton*0.4>minSafety? jetton*0.4:minSafety);
+				}else{
+					safety = minSafety;
+				}
+				safety = (int) (jetton*0.9>minSafety? jetton*0.9:minSafety);
 			}
 			break;
 		case HULU:
 			if(pub_state == HULU){
-				safety = 0;
+				safety = minSafety;
 			}else if(pub_state != SANTIAO){
 				safety = jetton;
 			}else{
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.8>minSafety? jetton*0.8:minSafety);
 			}
 			break;
 		case TONGHUA:
 			if(pub_state == TONGHUA){
-				safety = 0;
+				safety = minSafety;
 			}else if(pub_prestate!=ZHUNTONGHUASHUN || pub_prestate!=ZHUNTONGHUA || pub_state != SANTIAO || pub_state != DUIZI){
 				safety = jetton;
 			}else if(pub_prestate == ZHUNTONGHUASHUN){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.4>minSafety? jetton*0.4:minSafety);
 			}else if(pub_prestate == SANTIAO){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.5>minSafety? jetton*0.5:minSafety);
 			}else if(pub_state == ZHUNTONGHUA){
-				safety = jetton;
+				safety = (int) (jetton*0.8>minSafety? jetton*0.8:minSafety);
 			}else if(pub_state == DUIZI){
-				safety = jetton;
+				safety = (int) (jetton*0.9>minSafety? jetton*0.9:minSafety);
 			}else{
 				safety = jetton;
 			}
 			break;
 		case SHUNZI:
 			if(pub_state == SHUNZI){
-				safety = 0;
+				safety = minSafety;
 			}else if(pub_prestate!=ZHUNTONGHUASHUN ||pub_prestate != ZHUNTONGHUA || pub_prestate != ZHUNSHUNZI || pub_state != SANTIAO || pub_state != TWODUIZI || pub_state != DUIZI){
 				safety = jetton;
 			}else if(pub_prestate == ZHUNTONGHUASHUN){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 			}else if(pub_prestate == ZHUNTONGHUA){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 			}else if(pub_state == SANTIAO){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 			}else if(pub_prestate == TWODUIZI){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 			}else if(pub_prestate == ZHUNSHUNZI){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 			}else if(pub_state == DUIZI){
-				safety = jetton;
+				safety = (int) (jetton*0.9>minSafety? jetton*0.9:minSafety);
 			}else{
 				safety = jetton;
 			}
@@ -307,22 +335,22 @@ public class Ai {
 		case SANTIAO:
 			if(pub_state == SANTIAO){
 				if(self_pokers[0].getnum() == 14){
-					safety = jetton;
+					safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 				}else if(self_pokers[0].getnum() == 13){
-					safety = jetton/2>minSafety?jetton/2:minSafety;
+					safety = (int) (jetton*0.2>minSafety? jetton*0.2:minSafety);
 				}else{
-					safety = 0;
+					safety = minSafety;
 				}
 			}else if(pub_prestate == ZHUNTONGHUASHUN){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 			}else if(pub_state == TWODUIZI){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 			}else if(pub_prestate == ZHUNTONGHUA){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 			}else if(pub_prestate == ZHUNSHUNZI){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 			}else if(pub_state == DUIZI){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 			}else{
 				safety = jetton;
 			}
@@ -330,58 +358,94 @@ public class Ai {
 		case TWODUIZI:
 			if(pub_state == TWODUIZI){
 				if(self_pokers[0].getnum() == 14){
-					safety = jetton;
+					safety = (int) (jetton*0.6>minSafety? jetton*0.6:minSafety);
 				}else if(self_pokers[0].getnum() == 13){
-					safety = jetton/2>minSafety?jetton/2:minSafety;
+					safety = (int) (jetton*0.3>minSafety? jetton*0.3:minSafety);
 				}else{
-					safety = 0;
+					safety = minSafety;
 				}
 			}else if(pub_prestate == ZHUNTONGHUASHUN){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.2>minSafety? jetton*0.2:minSafety);
 			}else if(pub_prestate == ZHUNTONGHUA){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.2>minSafety? jetton*0.2:minSafety);
 			}else if(pub_prestate == ZHUNSHUNZI){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.2>minSafety? jetton*0.2:minSafety);
 			}else if(pub_state == DUIZI){
-				safety = jetton/2>minSafety?jetton/2:minSafety;
+				safety = (int) (jetton*0.7>minSafety? jetton*0.7:minSafety);
 			}else{
-				safety = jetton;
+				if(self_pokers[0].getnum() > 10){
+					safety = jetton;
+				}else if(self_pokers[0].getnum() > 10){
+					safety = (int) (jetton*0.9>minSafety? jetton*0.9:minSafety);
+				}else{
+					safety = (int) (jetton*0.6>minSafety? jetton*0.6:minSafety);
+				}
 			}
 			break;
 		case DUIZI:
 			if(pub_state == DUIZI){
-				safety = 0;
-			}else{
-				int duizi_num = Checkstate.getNumDUIZI(pokers);
-				if(duizi_num > 10){
-					safety = (int) (MAX_RAISE*RAISE_FIGURE*duizi_num);
-					if(pub_prestate == ZHUNTONGHUASHUN){
-						safety = jetton/3>minSafety?jetton/3:minSafety;
-					}else if(pub_prestate == ZHUNTONGHUA){
-						safety = jetton/3>minSafety?jetton/3:minSafety;
-					}else if(pub_prestate == ZHUNSHUNZI){
-						safety = jetton/3>minSafety?jetton/3:minSafety;
+				if(self_pokers[1].getnum() > 9){
+					if(pokers.length == 5){
+						safety = minSafety*3;
+					}else if(pokers.length == 6){
+						safety = minSafety*2;
+					}else{
+						safety = minSafety;
 					}
 				}else{
-					safety = 0;
+					safety = minSafety;
+				}
+			}else{
+				int duizi_num = Checkstate.getNumDUIZI(pokers);
+				if(duizi_num > 9){
+					safety = (int) (MAX_RAISE*RAISE_FIGURE*duizi_num);
+					if(pub_prestate == ZHUNTONGHUASHUN){
+						safety = (int) (jetton*0.2>minSafety? jetton*0.2:minSafety);
+					}else if(pub_prestate == ZHUNTONGHUA){
+						safety = (int) (jetton*0.2>minSafety? jetton*0.2:minSafety);
+					}else if(pub_prestate == ZHUNSHUNZI){
+						safety = (int) (jetton*0.2>minSafety? jetton*0.2:minSafety);
+					}else if(duizi_num == 14){
+						safety = jetton;
+					}else if(duizi_num == 13){
+						safety =  (int) (jetton*0.9>minSafety? jetton*0.9:minSafety);
+					}else{
+						safety =  (int) (jetton*0.5>minSafety? jetton*0.5:minSafety);
+					}
+				}else{
+					safety = (int) (jetton*0.2>minSafety? jetton*0.2:minSafety);
 				}
 			}
 			break;
 		case GAOPAI:
 			if(pokers.length == 5){
 				if(prestate == ZHUNTONGHUASHUN){
-					safety = jetton/3>minSafety?jetton/3:minSafety;
+					safety = (int) (jetton*0.5>minSafety? jetton*0.5:minSafety);
 				}else if(prestate == ZHUNSHUNZI || prestate == ZHUNTONGHUA){
-					safety = jetton/3>minSafety?jetton/3:minSafety;
+					safety = (int) (jetton*0.4>minSafety? jetton*0.4:minSafety);
+				}else if(prestate == THREESHUNZI || prestate == THREETONGHUA){
+					safety = minSafety;
+				}else if(self_pokers[0].getnum()>10){
+					safety = minSafety;
 				}
 			}else if(pokers.length == 6){
 				if(prestate == ZHUNTONGHUASHUN){
-					safety = jetton/3>minSafety?jetton/3:minSafety;
+					safety = (int) (jetton*0.4>minSafety? jetton*0.4:minSafety);
 				}else if(prestate == ZHUNSHUNZI || prestate == ZHUNTONGHUA){
-					safety = jetton/3>minSafety?jetton/3:minSafety;
+					safety = (int) (jetton*0.1>minSafety? jetton*0.1:minSafety);
+				}else{
+					if(self_pokers[1].getnum() > 9){
+						safety = minSafety;
+					}else{
+						safety = 0;
+					}
 				}
 			}else{
-				safety = 0;
+				if(self_pokers[1].getnum() > 9){
+					safety = minSafety;
+				}else{
+					safety = 0;
+				}
 			}			
 			break;
 		default:
@@ -409,6 +473,9 @@ public class Ai {
 		int max_raise = (int)(MAX_RAISE*richstate-bet);
 		
 		if(state == DUIZI){
+			if(max_num > 10){
+				raise_num = max_raise;
+			}
 			raise_num = (int) (MAX_RAISE*RAISE_FIGURE*max_num);
 		}else if(state == GAOPAI){
 			if(second_num > 10){
@@ -450,10 +517,10 @@ public class Ai {
 				break;
 			case SITIAO:
 				if(pub_state == SITIAO){
-					if(self_pokers[0].getnum() > 12){
-						raise_num = (int) (MAX_RAISE * RAISE_FIGURE * (self_pokers[0].getnum() - 12));
-					}else{
-						raise_num = 0;
+					if(self_pokers[0].getnum() == 14){
+						return (int)(jetton*(1/(8-pokers.length)));
+					}else if(self_pokers[0].getnum() == 13){
+						raise_num = max_raise;
 					}
 				}else if(pub_state != SANTIAO || pub_prestate != ZHUNTONGHUASHUN){
 					return (int)(jetton*(1/(8-pokers.length)));
@@ -464,7 +531,7 @@ public class Ai {
 			case HULU:
 				if(pub_state == HULU){
 					raise_num = 0;
-				}else if(pub_state != SANTIAO || pub_prestate != ZHUNTONGHUASHUN){
+				}else if(pub_state != SANTIAO || pub_state != SITIAO){
 					return (int)(jetton*(1/(8-pokers.length)));
 				}else{
 					raise_num = max_raise;
@@ -516,8 +583,6 @@ public class Ai {
 						raise_num = 0;
 					}
 				}else if(pub_prestate == ZHUNTONGHUASHUN){
-					raise_num = max_raise/6;
-				}else if(pub_state == TWODUIZI){
 					raise_num = max_raise/5;
 				}else if(pub_prestate == ZHUNTONGHUA){
 					raise_num = max_raise/4;
@@ -549,22 +614,29 @@ public class Ai {
 				}
 				break;
 			case DUIZI:
-				if(pub_state == DUIZI){
-					if(self_pokers[0].getnum() > 12){
-						raise_num = (int) (MAX_RAISE * RAISE_FIGURE * (self_pokers[0].getnum() - 12));
-					}else{
+				if(pub_state == DUIZI){	
 						raise_num = 0;
-					}
 				}else{
 					int duizi_num = Checkstate.getNumDUIZI(pokers);
+					if(pub_prestate != ZHUNTONGHUASHUN && pub_prestate != ZHUNSHUNZI && pub_prestate != ZHUNTONGHUA && pub_prestate != THREESHUNZI && pub_prestate !=THREETONGHUA){
+						if(pokers[0].getnum() == duizi_num || duizi_num == 14){
+							return (int)(jetton*(1/(8-pokers.length)));
+						}else if((pokers[1].getnum() ==  duizi_num || duizi_num > 11) && Checkstate.checkDUIZI(self_pokers)){
+							return (int)(jetton*(1/(8-pokers.length)));
+						}else{
+							raise_num = 0;
+						}
+					}else {
+						
+					}
 					if(duizi_num > 10){
-						raise_num = (int) (MAX_RAISE*RAISE_FIGURE*duizi_num);
+						raise_num = (int) (MAX_RAISE*RAISE_FIGURE*duizi_num);	
 						if(pub_prestate == ZHUNTONGHUASHUN){
-							raise_num = raise_num/5;
+							raise_num = 0;
 						}else if(pub_prestate == ZHUNTONGHUA){
-							raise_num = raise_num/4;
+							raise_num = 0;
 						}else if(pub_prestate == ZHUNSHUNZI){
-							raise_num = raise_num/3;
+							raise_num = 0;
 						}
 					}else{
 						raise_num = 0;
@@ -572,11 +644,7 @@ public class Ai {
 				}
 				break;
 			case GAOPAI:
-				if(self_pokers[0].getnum() > 12){
-					raise_num = (int) (MAX_RAISE * RAISE_FIGURE * (self_pokers[0].getnum() - 12));
-				}else{
-					raise_num = 0;
-				}
+				raise_num = 0;
 				break;
 			default:
 				raise_num = 0;
